@@ -1,162 +1,155 @@
 # Orange TrustSkill v2.0 🍊
 
-Advanced Security Scanner for OpenClaw Skills
+OpenClaw Skills 高级安全扫描器
 
-[![Version](https://img.shields.io/badge/version-2.0.0-orange.svg)](https://github.com/iamoldorange666/orange-trustskill)
+[![版本](https://img.shields.io/badge/version-2.0.0-orange.svg)](https://github.com/iamoldorange666/orange-trustskill)
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![协议](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## ✨ Features
+## ✨ 功能特性
 
-- 🔍 **Multi-layer Analysis**: Regex + AST + Deep Inspection
-- 🎯 **Accurate Detection**: Context-aware pattern matching
-- 🌈 **Rich Output**: Colored text, JSON, Markdown formats
-- 📊 **Progress Tracking**: Real-time scan progress
-- 🔒 **Comprehensive Checks**:
-  - Command injection (eval, exec, os.system)
-  - Data exfiltration (HTTP requests)
-  - Credential theft (SSH keys, passwords, API keys)
-  - Sensitive file access (Memory files, configs)
-  - File system risks (dangerous deletions)
-  - Code obfuscation (Base64, ROT13)
+- 🔍 **多层分析**: 正则 + AST + 深度检查
+- 🎯 **精准检测**: 上下文感知模式匹配
+- 🌈 **丰富输出**: 彩色文本、JSON、Markdown 格式
+- 📊 **进度跟踪**: 实时扫描进度显示
+- 🔒 **全面检查**:
+  - 命令注入 (eval, exec, os.system)
+  - 数据外泄 (HTTP 请求)
+  - 凭证窃取 (SSH 密钥、密码、API Key)
+  - 敏感文件访问 (Memory 文件、配置)
+  - 文件系统风险 (危险删除)
+  - 代码混淆 (Base64, ROT13)
 
-## 🚀 Quick Start
+## 🚀 快速开始
 
 ```bash
-# Scan a skill
+# 扫描 skill
 python3 src/cli.py /path/to/skill
 
-# Deep scan with all checks
+# 深度扫描（完整检查）
 python3 src/cli.py /path/to/skill --mode deep
 
-# JSON output
+# JSON 输出
 python3 src/cli.py /path/to/skill --format json
 
-# Export for LLM review
+# 导出给 LLM 审查
 python3 src/cli.py /path/to/skill --export-for-llm
 ```
 
-## 📦 Installation
+## 📦 安装
 
 ```bash
 git clone https://github.com/iamoldorange666/orange-trustskill.git
 cd orange-trustskill
 ```
 
-No dependencies required! Pure Python standard library.
+无需额外依赖！纯 Python 标准库实现。
 
-## 🔧 Usage
+## 🔧 使用方法
 
-### Analysis Modes
+### 分析模式
 
-| Mode | Description | Speed | Accuracy |
-|------|-------------|-------|----------|
-| `fast` | Regex only | ⚡ Fast | ⭐⭐ |
-| `standard` | Regex + AST | ⚡ Balanced | ⭐⭐⭐⭐ |
-| `deep` | Full analysis | 🐢 Thorough | ⭐⭐⭐⭐⭐ |
+| 模式 | 说明 | 速度 | 准确度 |
+|------|------|------|--------|
+| `fast` | 仅正则 | ⚡ 快 | ⭐⭐ |
+| `standard` | 正则 + AST | ⚡ 均衡 | ⭐⭐⭐⭐ |
+| `deep` | 完整分析 | 🐢 彻底 | ⭐⭐⭐⭐⭐ |
 
-### Output Formats
+### 输出格式
 
-- **text**: Colored terminal output (default)
-- **json**: Machine-readable JSON
-- **markdown**: For LLM review
+- **text**: 彩色终端输出（默认）
+- **json**: 机器可读 JSON
+- **markdown**: 用于 LLM 审查
 
-### Examples
+### 示例
 
 ```bash
-# Basic scan
+# 基础扫描
 python3 src/cli.py ~/.openclaw/skills/my-skill
 
-# Deep scan with progress
+# 深度扫描（带进度）
 python3 src/cli.py ~/.openclaw/skills/my-skill --mode deep
 
-# JSON output for CI/CD
+# CI/CD JSON 输出
 python3 src/cli.py ~/.openclaw/skills/my-skill --format json --quiet
 
-# Markdown for manual review
+# Markdown 手动审查
 python3 src/cli.py ~/.openclaw/skills/my-skill --export-for-llm > report.md
 ```
 
-## 🛡️ Security Checks
+## 🛡️ 安全检查项
 
-### HIGH Risk
-- Command injection (eval, exec, os.system with variables)
-- Data exfiltration (HTTP POST, suspicious URLs)
-- File deletion (rm -rf, shutil.rmtree)
-- Credential access (.ssh/, passwords, tokens)
-- Sensitive file access (MEMORY.md, config.json)
+### 高风险 🔴
+- 命令注入 (eval, exec, 带变量的 os.system)
+- 数据外泄 (HTTP POST, 可疑 URL)
+- 文件删除 (rm -rf, shutil.rmtree)
+- 凭证访问 (.ssh/, 密码, Token)
+- 敏感文件访问 (MEMORY.md, config.json)
 
-### MEDIUM Risk
-- Network requests (requests, urllib)
-- File access outside workspace (/etc/, ~)
-- Code obfuscation (Base64, ROT13)
-- Dynamic imports (__import__, importlib)
-- API key usage
+### 中风险 🟡
+- 网络请求 (requests, urllib)
+- 工作区外文件访问 (/etc/, ~)
+- 代码混淆 (Base64, ROT13)
+- 动态导入 (__import__, importlib)
+- API Key 使用
 
-### LOW Risk
-- Shell commands (static commands)
-- File operations (open, path manipulation)
+### 低风险 🟢
+- Shell 命令 (静态命令)
+- 文件操作 (open, path 操作)
 
-## 🏗️ Architecture
+## 🏗️ 架构
 
 ```
 src/
-├── __init__.py              # Package init
-├── types.py                 # Data types (Severity, ScanResult, etc.)
-├── rules.py                 # Security patterns and rules
-├── scanner.py               # Main scanner logic
-├── cli.py                   # Command line interface
+├── __init__.py              # 包初始化
+├── types.py                 # 数据类型 (Severity, ScanResult 等)
+├── rules.py                 # 安全模式和规则
+├── scanner.py               # 主扫描器逻辑
+├── cli.py                   # 命令行接口
 ├── analyzers/
-│   ├── base.py              # Analyzer base class
-│   ├── regex_analyzer.py    # Regex pattern matching
-│   └── ast_analyzer.py      # Python AST analysis
+│   ├── base.py              # 分析器基类
+│   ├── regex_analyzer.py    # 正则模式匹配
+│   └── ast_analyzer.py      # Python AST 分析
 └── formatters/
-    ├── base.py              # Formatter base class
-    ├── text_formatter.py    # Colored text output
-    ├── json_formatter.py    # JSON output
-    └── markdown_formatter.py # Markdown output
+    ├── base.py              # 格式化器基类
+    ├── text_formatter.py    # 彩色文本输出
+    ├── json_formatter.py    # JSON 输出
+    └── markdown_formatter.py # Markdown 输出
 ```
 
-## 🔍 How It Works
+## 🔍 工作原理
 
-1. **File Discovery**: Recursively find all relevant files
-2. **Multi-layer Analysis**:
-   - Regex: Fast pattern matching
-   - AST: Deep code structure analysis (Python only)
-3. **Context-aware Filtering**: Reduce false positives
-4. **Risk Assessment**: Categorize and prioritize findings
-5. **Rich Reporting**: Multiple output formats
+1. **文件发现**: 递归查找所有相关文件
+2. **多层分析**:
+   - 正则: 快速模式匹配
+   - AST: 深度代码结构分析 (仅 Python)
+3. **上下文感知过滤**: 减少误报
+4. **风险评估**: 分类和优先级排序
+5. **丰富报告**: 多种输出格式
 
-## 🆚 Comparison with v1.x
+## 🆚 v1.x 对比
 
-| Feature | v1.x | v2.0 |
-|---------|------|------|
-| Regex Analysis | ✅ | ✅ |
-| AST Analysis | ❌ | ✅ |
-| Multi-format Output | ❌ | ✅ |
-| Progress Tracking | ❌ | ✅ |
-| Colored Output | ❌ | ✅ |
-| Confidence Scoring | ❌ | ✅ |
-| Modular Architecture | ❌ | ✅ |
+| 功能 | v1.x | v2.0 |
+|------|------|------|
+| 正则分析 | ✅ | ✅ |
+| AST 分析 | ❌ | ✅ |
+| 多格式输出 | ❌ | ✅ |
+| 进度跟踪 | ❌ | ✅ |
+| 彩色输出 | ❌ | ✅ |
+| 置信度评分 | ❌ | ✅ |
+| 模块化架构 | ❌ | ✅ |
 
-## 🤝 Contributing
+## 🤝 贡献
 
-Contributions welcome! Please ensure:
-- Code follows PEP 8
-- Add tests for new features
-- Update documentation
+欢迎贡献！请确保：
+- 代码遵循 PEP 8
+- 为新功能添加测试
+- 更新文档
 
-## 📄 License
+## 📄 协议
 
-MIT License - see [LICENSE](LICENSE) file
-
-## 🙏 Acknowledgments
-
-Inspired by [TrustSkill](https://github.com/nonabit/TrustSkill) but optimized for OpenClaw with specific focus on:
-- OpenClaw memory file protection
-- API key usage detection
-- Safe service whitelisting
+MIT 协议 - 查看 [LICENSE](LICENSE) 文件
 
 ---
 
-Made with 🧡 by Orange
+用 🧡 制作 by Orange
