@@ -1,0 +1,16 @@
+# 忽略敏感配置文件
+.nvidia_nim_config
+.env
+.env.local
+*.key
+*.secret
+
+# 忽略本地数据
+*.log
+.DS_Store
+__pycache__/
+*.pyc
+
+# 忽略测试文件
+test/
+tests/
