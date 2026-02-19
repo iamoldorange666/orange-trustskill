@@ -1,9 +1,19 @@
 ---
 name: orange-trustskill
-description: Orange's TrustSkill - Security scanner for OpenClaw skills. Detects malicious code, backdoors, command injection, file system risks, network exfiltration, and sensitive data leaks in skill scripts. Use when: (1) Installing a new skill from untrusted source, (2) Auditing existing skills for security, (3) Before executing skill code that performs system operations, (4) Validating skills before publishing to ClawHub.
+version: 1.1.0
+description: Orange's TrustSkill - Security scanner for OpenClaw skills. Detects malicious code, backdoors, credential theft, privacy file access, command injection, file system risks, network exfiltration, and sensitive data leaks in skill scripts. Enhanced version with comprehensive privacy and security checks.
 ---
 
-# Skill Security Scanner
+# Orange's TrustSkill - Skill Security Scanner
+
+A comprehensive security scanner for OpenClaw skills that detects:
+- Malicious code and backdoors
+- Credential theft (SSH keys, passwords, API keys)
+- Privacy file access (Memory files, configs)
+- Command injection
+- Data exfiltration
+- File system risks
+- Network security issues
 
 A security scanner for OpenClaw skills that detects potential malicious code, backdoors, and security risks.
 

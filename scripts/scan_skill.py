@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Skill Security Scanner for OpenClaw
-Detects malicious code, backdoors, and security risks in skills
+Skill Security Scanner for OpenClaw - Enhanced Version
+Detects malicious code, backdoors, credential theft, and security risks
 """
 
 import os
@@ -10,18 +10,18 @@ import sys
 import json
 import argparse
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Set
 
 
 class SecurityScanner:
-    """Security scanner for OpenClaw skills"""
+    """Enhanced security scanner for OpenClaw skills"""
     
-    # High risk patterns
+    # High risk patterns - potentially malicious
     HIGH_RISK_PATTERNS = {
         'command_injection': [
             (r'eval\s*\(', 'eval() execution'),
-            (r'exec\s*\([^)]*\+', 'exec() with variable'),
-            (r'os\.system\s*\([^)]*[\+\%\$\{]', 'os.system with variable'),
+            (r'exec\s*\([^)]*[\+\%\$\{\}]', 'exec() with variable'),
+            (r'os\.system\s*\([^)]*[\+\%\$\{\}]', 'os.system with variable'),
             (r'subprocess\.(call|run|Popen)\s*\([^)]*shell\s*=\s*True', 'subprocess with shell=True'),
         ],
         'data_exfiltration': [
@@ -39,18 +39,25 @@ class SecurityScanner:
             (r'open\s*\([^)]*password', 'Password file access'),
             (r'open\s*\([^)]*token', 'Token file access'),
             (r'open\s*\([^)]*secret', 'Secret file access'),
+        ],
+        'sensitive_file_access': [
+            (r'\.openclaw[/\\]config\.json', 'OpenClaw config access'),
+            (r'MEMORY\.md|SOUL\.md|USER\.md|AGENTS\.md', 'Memory file access'),
+            (r'\.bashrc|\.zshrc|\.profile', 'Shell config access'),
+            (r'\.env[^/]*', 'Environment file access'),
         ]
     }
     
-    # Medium risk patterns
+    # Medium risk patterns - needs review
     MEDIUM_RISK_PATTERNS = {
         'network_request': [
             (r'requests\.(get|post|put|delete)', 'HTTP request'),
             (r'urllib', 'urllib usage'),
         ],
-        'file_access': [
+        'file_access_outside_workspace': [
             (r'open\s*\([^)]*[\'"]\s*[/\\]etc[/\\]', 'System file access'),
             (r'open\s*\([^)]*[\'"]\s*[/\\]sys', 'System file access'),
+            (r'expanduser\s*\(\s*[\'"]~[\'"]', 'Home directory access'),
         ],
         'obfuscation': [
             (r'base64\.(b64decode|decode)', 'Base64 decoding'),
@@ -60,10 +67,14 @@ class SecurityScanner:
         'dynamic_import': [
             (r'__import__\s*\(', 'Dynamic import'),
             (r'importlib\.(import_module|__import__)', 'Dynamic import'),
+        ],
+        'api_key_usage': [
+            (r'api[_-]?key|apikey', 'API key usage'),
+            (r'gemini|openai|anthropic', 'AI service API call'),
         ]
     }
     
-    # Low risk patterns
+    # Low risk patterns - informational
     LOW_RISK_PATTERNS = {
         'shell_command': [
             (r'os\.system\s*\(', 'os.system call'),
@@ -82,115 +93,122 @@ class SecurityScanner:
         (r'https?://[^/\s]*githubusercontent', 'Raw GitHub content'),
     ]
     
+    # Safe external services (expected for certain skills)
+    SAFE_SERVICES = [
+        'api.nvidia.com',
+        'api.openai.com',
+        'generativelanguage.googleapis.com',
+        'api.anthropic.com',
+        'api.xiaohongshu.com',
+        'xiaohongshu.com',
+    ]
+    
     def __init__(self, skill_path: str, mode: str = 'standard'):
         self.skill_path = Path(skill_path)
         self.mode = mode
         self.findings = []
+        self.checked_files: Set[Path] = set()
         
     def scan(self) -> Dict[str, Any]:
         """Run full security scan"""
         if not self.skill_path.exists():
             return {'error': f'Skill path not found: {self.skill_path}'}
         
-        # Find all relevant files
         files_to_scan = self._get_files_to_scan()
         
         for file_path in files_to_scan:
-            self._scan_file(file_path)
+            if file_path not in self.checked_files:
+                self._scan_file(file_path)
+                self.checked_files.add(file_path)
         
         return {
             'skill_path': str(self.skill_path),
-            'files_scanned': len(files_to_scan),
+            'files_scanned': len(self.checked_files),
             'findings': self.findings,
-            'risk_summary': self._get_risk_summary()
+            'risk_summary': self._get_risk_summary(),
+            'security_assessment': self._generate_assessment()
         }
     
     def _get_files_to_scan(self) -> List[Path]:
         """Get list of files to scan"""
         files = []
-        extensions = {'.py', '.js', '.sh', '.bash', '.zsh', '.md'}
+        extensions = {'.py', '.js', '.sh', '.bash', '.zsh', '.md', '.txt'}
         
         for ext in extensions:
             files.extend(self.skill_path.rglob(f'*{ext}'))
         
-        # Also check SKILL.md
+        # Check SKILL.md
         skill_md = self.skill_path / 'SKILL.md'
-        if skill_md.exists() and skill_md not in files:
+        if skill_md.exists():
             files.append(skill_md)
-        
-        return files
+            
+        return list(set(files))  # Remove duplicates
     
     def _is_in_string_literal(self, content: str, position: int) -> bool:
-        """Check if position is inside a string literal (likely a regex pattern)"""
-        # Look backwards to find if we're inside quotes
+        """Check if position is inside a string literal"""
         lines_before = content[:position].split('\n')
         current_line = lines_before[-1] if lines_before else ""
         
-        # Count quotes in current line before position
         single_quotes = current_line.count("'") - current_line.count("\'")
         double_quotes = current_line.count('"') - current_line.count('\"')
-        triple_single = current_line.count("'''")
-        triple_double = current_line.count('"""')
         
-        # Simple heuristic: odd number of quotes means we're inside a string
-        in_string = (single_quotes % 2 == 1 or double_quotes % 2 == 1 or 
-                     triple_single > 0 or triple_double > 0)
-        return in_string
+        return (single_quotes % 2 == 1 or double_quotes % 2 == 1)
     
     def _is_pattern_definition(self, content: str, position: int) -> bool:
         """Check if the match is part of a regex pattern definition"""
-        # Check if it's in a list of patterns
         context = content[max(0, position-100):position+100]
         pattern_indicators = [
             "PATTERNS", "patterns", "regex", "PATTERN", 
-            r"r'", r'r"', "re.compile", ".compile("
+            "r'", 'r"', "re.compile", ".compile("
         ]
         return any(indicator in context for indicator in pattern_indicators)
     
     def _is_example_code(self, content: str, position: int) -> bool:
         """Check if the match is in example/comment context"""
-        # Get surrounding context
         start = max(0, position - 200)
         end = min(len(content), position + 200)
         context = content[start:end].lower()
         
-        # Check for example indicators
         example_indicators = [
             'example', 'danger:', 'caution:', 'warning:', 
-            'bad:', 'wrong:', 'unsafe:', 'risk:', 'pattern'
+            'bad:', 'wrong:', 'unsafe:', 'risk:', 'pattern', 'todo:'
         ]
         return any(indicator in context for indicator in example_indicators)
+    
+    def _is_safe_service(self, url: str) -> bool:
+        """Check if URL is a known safe service"""
+        return any(service in url for service in self.SAFE_SERVICES)
     
     def _scan_file(self, file_path: Path):
         """Scan a single file"""
         try:
             content = file_path.read_text(encoding='utf-8', errors='ignore')
             relative_path = file_path.relative_to(self.skill_path)
-        except Exception as e:
+        except Exception:
             return
         
-        # Skip scanning reference files for actual malicious patterns
-        # (they contain examples of malicious code)
-        is_reference_file = 'reference' in str(file_path).lower() or str(file_path).endswith('_patterns.md')
+        is_reference = 'reference' in str(file_path).lower() or str(file_path).endswith('_patterns.md')
         
         # Check high risk patterns
         for category, patterns in self.HIGH_RISK_PATTERNS.items():
             for pattern, description in patterns:
                 for match in re.finditer(pattern, content, re.IGNORECASE):
-                    # Skip if in example/documentation context or pattern definition
-                    if (is_reference_file or 
+                    if (is_reference or 
                         self._is_example_code(content, match.start()) or
                         self._is_in_string_literal(content, match.start()) or
                         self._is_pattern_definition(content, match.start())):
                         continue
+                    
                     line_num = content[:match.start()].count('\n') + 1
+                    snippet = self._get_snippet(content, match.start())
+                    
                     self.findings.append({
                         'level': 'HIGH',
                         'category': category,
                         'description': description,
                         'file': str(relative_path),
                         'line': line_num,
-                        'snippet': self._get_snippet(content, match.start())
+                        'snippet': snippet
                     })
         
         # Check medium risk patterns
@@ -226,6 +244,9 @@ class SecurityScanner:
         # Check suspicious URLs
         for pattern, description in self.SUSPICIOUS_PATTERNS:
             for match in re.finditer(pattern, content, re.IGNORECASE):
+                url = match.group(0)
+                if self._is_safe_service(url):
+                    continue
                 line_num = content[:match.start()].count('\n') + 1
                 self.findings.append({
                     'level': 'MEDIUM',
@@ -250,24 +271,40 @@ class SecurityScanner:
             summary[finding['level']] += 1
         return summary
     
+    def _generate_assessment(self) -> str:
+        """Generate overall security assessment"""
+        summary = self._get_risk_summary()
+        
+        if summary['HIGH'] > 0:
+            return "CRITICAL: High-risk issues detected. Manual review required before execution."
+        elif summary['MEDIUM'] > 5:
+            return "WARNING: Multiple medium-risk issues found. Review recommended."
+        elif summary['MEDIUM'] > 0:
+            return "CAUTION: Some medium-risk issues found. Review suggested."
+        else:
+            return "SAFE: No significant security issues found."
+    
     def export_for_llm(self) -> str:
         """Export findings for LLM review"""
-        report = []
-        report.append("=" * 60)
-        report.append("SKILL SECURITY SCAN - LLM REVIEW EXPORT")
-        report.append("=" * 60)
-        report.append(f"\nSkill Path: {self.skill_path}")
-        report.append(f"Scan Mode: {self.mode}")
-        report.append(f"Total Findings: {len(self.findings)}\n")
+        lines = [
+            "=" * 60,
+            "SKILL SECURITY SCAN - LLM REVIEW EXPORT",
+            "=" * 60,
+            f"\nSkill Path: {self.skill_path}",
+            f"Scan Mode: {self.mode}",
+            f"Total Findings: {len(self.findings)}\n"
+        ]
         
         for finding in self.findings:
-            report.append(f"\n[{finding['level']}] {finding['category']}")
-            report.append(f"File: {finding['file']}:{finding['line']}")
-            report.append(f"Issue: {finding['description']}")
-            report.append(f"Code: {finding['snippet']}")
-            report.append("-" * 40)
+            lines.extend([
+                f"\n[{finding['level']}] {finding['category']}",
+                f"File: {finding['file']}:{finding['line']}",
+                f"Issue: {finding['description']}",
+                f"Code: {finding['snippet']}",
+                "-" * 40
+            ])
         
-        return '\n'.join(report)
+        return '\n'.join(lines)
 
 
 def print_report(result: Dict[str, Any], format_type: str = 'text'):
@@ -289,7 +326,7 @@ def print_report(result: Dict[str, Any], format_type: str = 'text'):
     print(f"Total Findings: {len(result['findings'])}")
     
     summary = result['risk_summary']
-    print(f"\nRisk Summary:")
+    print(f"\n📊 Risk Summary:")
     print(f"  🔴 HIGH:   {summary['HIGH']}")
     print(f"  🟡 MEDIUM: {summary['MEDIUM']}")
     print(f"  🟢 LOW:    {summary['LOW']}")
@@ -309,19 +346,13 @@ def print_report(result: Dict[str, Any], format_type: str = 'text'):
         print("\n✅ No security issues found!")
     
     print(f"\n{'='*60}")
-    
-    # Recommendations
-    if summary['HIGH'] > 0:
-        print("⚠️  CRITICAL: High-risk issues detected. Manual review required before execution.")
-    elif summary['MEDIUM'] > 0:
-        print("⚡ WARNING: Medium-risk issues found. Review recommended before execution.")
-    else:
-        print("✓ Scan complete. Skill appears safe for execution.")
+    print(f"Assessment: {result.get('security_assessment', 'N/A')}")
+    print(f"{'='*60}")
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Security scanner for OpenClaw skills'
+        description='Orange TrustSkill - Security scanner for OpenClaw skills'
     )
     parser.add_argument('skill_path', help='Path to skill directory')
     parser.add_argument(
