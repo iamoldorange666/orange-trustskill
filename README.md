@@ -11,7 +11,7 @@
 
 1. 确保 skill 文件夹在正确位置：
 ```
-~/.openclaw/workspace/skills/orange-trustskill/
+/path/to/skills/orange-trustskill/
 ├── SKILL.md
 ├── references/
 │   └── security_patterns.md
@@ -21,29 +21,29 @@
 
 2. 给脚本添加执行权限：
 ```bash
-chmod +x ~/.openclaw/workspace/skills/orange-trustskill/scripts/scan_skill.py
+chmod +x /path/to/skills/orange-trustskill/scripts/scan_skill.py
 ```
 
 ## 使用方法
 
 ### 基本扫描
 ```bash
-python3 ~/.openclaw/workspace/skills/orange-trustskill/scripts/scan_skill.py /path/to/skill-folder
+python3 /path/to/skills/orange-trustskill/scripts/scan_skill.py /path/to/skill-folder
 ```
 
 ### 深度扫描（包含低风险提示）
 ```bash
-python3 ~/.openclaw/workspace/skills/orange-trustskill/scripts/scan_skill.py /path/to/skill-folder --mode deep
+python3 /path/to/skills/orange-trustskill/scripts/scan_skill.py /path/to/skill-folder --mode deep
 ```
 
 ### JSON 格式输出
 ```bash
-python3 ~/.openclaw/workspace/skills/orange-trustskill/scripts/scan_skill.py /path/to/skill-folder --format json
+python3 /path/to/skills/orange-trustskill/scripts/scan_skill.py /path/to/skill-folder --format json
 ```
 
 ### 导出给 LLM 审查
 ```bash
-python3 ~/.openclaw/workspace/skills/orange-trustskill/scripts/scan_skill.py /path/to/skill-folder --export-for-llm
+python3 /path/to/skills/orange-trustskill/scripts/scan_skill.py /path/to/skill-folder --export-for-llm
 ```
 
 ## 扫描模式
@@ -64,13 +64,13 @@ python3 ~/.openclaw/workspace/skills/orange-trustskill/scripts/scan_skill.py /pa
 
 ```bash
 # 扫描安装的 skill
-python3 ~/.openclaw/workspace/skills/orange-trustskill/scripts/scan_skill.py ~/.openclaw/skills/some-new-skill
+python3 /path/to/skills/orange-trustskill/scripts/scan_skill.py /path/to/skills/some-new-skill
 
-# 扫描官方 skill
-python3 ~/.openclaw/workspace/skills/orange-trustskill/scripts/scan_skill.py /opt/homebrew/lib/node_modules/openclaw/skills/nano-pdf --mode deep
+# 扫描官方 skill（OpenClaw 安装路径示例）
+python3 /path/to/skills/orange-trustskill/scripts/scan_skill.py /opt/homebrew/lib/node_modules/openclaw/skills/nano-pdf --mode deep
 
 # 检查前输出 JSON 供程序处理
-python3 ~/.openclaw/workspace/skills/orange-trustskill/scripts/scan_skill.py /path/to/skill --format json --quiet
+python3 /path/to/skills/orange-trustskill/scripts/scan_skill.py /path/to/skill --format json --quiet
 ```
 
 ## 安全建议
