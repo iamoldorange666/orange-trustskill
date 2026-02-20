@@ -34,10 +34,16 @@ HIGH_RISK_PATTERNS = {
     ],
     'sensitive_file_access': [
         (r'\.openclaw[/\\]config\.json', 'OpenClaw config access'),
-        (r'MEMORY\.md|SOUL\.md|USER\.md|AGENTS\.md|TOOLS\.md', 'Memory file access'),
         (r'\.bashrc|\.zshrc|\.profile|\.bash_profile', 'Shell config access'),
         (r'~/.ssh/', 'SSH directory access'),
-    ]
+    ],
+    'memory_file_access': [
+        (r'open\s*\([^)]*AGENTS\.md', 'AGENTS.md access - contains behavior rules'),
+        (r'open\s*\([^)]*SOUL\.md', 'SOUL.md access - contains personality'),
+        (r'open\s*\([^)]*USER\.md', 'USER.md access - contains user info'),
+        (r'open\s*\([^)]*MEMORY\.md', 'MEMORY.md access - contains long-term memory'),
+        (r'AGENTS\.md|SOUL\.md|USER\.md|MEMORY\.md', 'Memory file reference detected'),
+    ],
 }
 
 # 中风险模式 - 需要审查
