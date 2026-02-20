@@ -18,6 +18,14 @@ HIGH_RISK_PATTERNS = {
         (r'urllib\.(request|urlopen)', 'urllib network request'),
         (r'http\.client', 'HTTP client usage'),
         (r'socket\.(socket|connect)', 'Socket network connection'),
+        (r'curl\s+.*https?://', 'curl HTTP request'),
+        (r'curl.*webhook\.site|curl.*requestbin|curl.*pastebin', 'curl to suspicious webhook'),
+    ],
+    'obfuscation_exfiltration': [
+        (r'base64\.(b64encode|encode).*requests\.(post|put)', 'Base64 encode + HTTP POST (data exfiltration)'),
+        (r'base64\.(b64encode|encode).*urllib', 'Base64 encode + urllib (data exfiltration)'),
+        (r'base64\.(b64encode|encode).*curl', 'Base64 encode + curl (data exfiltration)'),
+        (r'base64\.(b64decode|decode)', 'Base64 decoding'),
     ],
     'file_deletion': [
         (r'shutil\.rmtree\s*\([^)]*[\/\*]', 'Recursive directory deletion'),
@@ -43,6 +51,25 @@ HIGH_RISK_PATTERNS = {
         (r'open\s*\([^)]*USER\.md', 'USER.md access - contains user info'),
         (r'open\s*\([^)]*MEMORY\.md', 'MEMORY.md access - contains long-term memory'),
         (r'AGENTS\.md|SOUL\.md|USER\.md|MEMORY\.md', 'Memory file reference detected'),
+    ],
+    'shell_history_access': [
+        (r'open\s*\([^)]*\.bash_history', 'Bash history access - contains command history'),
+        (r'open\s*\([^)]*\.zsh_history', 'Zsh history access - contains command history'),
+        (r'open\s*\([^)]*\.fish_history', 'Fish history access - contains command history'),
+        (r'\.bash_history|\.zsh_history|\.fish_history', 'Shell history file reference'),
+    ],
+    'keychain_access': [
+        (r'security\s+find-generic-password', 'macOS keychain access - generic passwords'),
+        (r'security\s+find-internet-password', 'macOS keychain access - internet passwords'),
+        (r'security\s+find-password', 'macOS keychain access - passwords'),
+        (r'keychain|Keychain', 'Keychain reference detected'),
+    ],
+    'credential_files_access': [
+        (r'open\s*\([^)]*\.netrc', '.netrc access - contains FTP/HTTP credentials'),
+        (r'open\s*\([^)]*\.aws[/\\]credentials', 'AWS credentials access'),
+        (r'open\s*\([^)]*\.docker[/\\]config\.json', 'Docker config access - contains registry passwords'),
+        (r'open\s*\([^)]*\.git-credentials', 'Git credentials access'),
+        (r'\.netrc|\.aws/credentials|\.docker/config\.json|\.git-credentials', 'Credential file reference'),
     ],
 }
 

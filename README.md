@@ -1,8 +1,8 @@
-# Orange TrustSkill v2.1 🍊
+# Orange TrustSkill v2.2 🍊
 
 OpenClaw Skills 高级安全扫描器
 
-[![版本](https://img.shields.io/badge/version-2.1.0-orange.svg)](https://github.com/iamoldorange666/orange-trustskill)
+[![版本](https://img.shields.io/badge/version-2.2.0-orange.svg)](https://github.com/iamoldorange666/orange-trustskill)
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/)
 [![协议](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -82,12 +82,14 @@ python3 src/cli.py ~/.openclaw/skills/my-skill --export-for-llm > report.md
 ### 高风险 🔴
 - 命令注入 (eval, exec, 带变量的 os.system)
 - 数据外泄 (HTTP POST, 可疑 URL)
+- **混淆外泄 (base64 + curl/webhook)** ⭐v2.2
 - 文件删除 (rm -rf, shutil.rmtree)
 - 凭证访问 (.ssh/, 密码, Token)
-- **记忆文件访问 (AGENTS.md, SOUL.md, USER.md, MEMORY.md)** ⭐v2.1新增
+- 记忆文件访问 (AGENTS.md, SOUL.md, USER.md, MEMORY.md)
+- **Shell 历史访问 (.bash_history, .zsh_history)** ⭐v2.2
+- **钥匙串访问 (macOS security)** ⭐v2.2
+- **凭证文件访问 (.netrc, .aws, .docker)** ⭐v2.2
 - 敏感文件访问 (OpenClaw 配置、Shell 配置)
-
-> 💡 **v2.1 新增**: 感谢 u/HaikuOpenClaw 的建议！现在可以检测 skills 是否试图读取包含敏感上下文的记忆文件（AGENTS.md、SOUL.md、USER.md、MEMORY.md）。这些文件包含你和 AI 的"灵魂"，比 ~/.env 更需保护。
 
 ### 中风险 🟡
 - 网络请求 (requests, urllib)
