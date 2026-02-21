@@ -1,10 +1,10 @@
 ---
 name: orange-trustskill
-version: 1.1.0
-description: Orange's TrustSkill - Security scanner for OpenClaw skills. Detects malicious code, backdoors, credential theft, privacy file access, command injection, file system risks, network exfiltration, and sensitive data leaks in skill scripts. Enhanced version with comprehensive privacy and security checks.
+version: 2.3.0
+description: Orange's TrustSkill - Security scanner for OpenClaw skills. Detects malicious code, backdoors, credential theft, privacy file access, command injection, file system risks, network exfiltration, sensitive data leaks, and SECURITY.md compliance. Enhanced version with comprehensive privacy and security checks.
 ---
 
-# Orange's TrustSkill - Skill Security Scanner
+# Orange's TrustSkill - Skill Security Scanner v2.3.0
 
 A comprehensive security scanner for OpenClaw skills that detects:
 - Malicious code and backdoors
@@ -14,14 +14,41 @@ A comprehensive security scanner for OpenClaw skills that detects:
 - Data exfiltration
 - File system risks
 - Network security issues
+- **NEW: SECURITY.md compliance checking** (v1.2.0)
 
 A security scanner for OpenClaw skills that detects potential malicious code, backdoors, and security risks.
 
 ## Quick Start
 
-Scan a skill directory:
+### Scan a skill directory
 ```bash
 python scripts/scan_skill.py /path/to/skill-folder
+```
+
+### Check SECURITY.md compliance (NEW in v1.2.0)
+```bash
+# Check all agents
+python scripts/check_security_compliance.py
+
+# Check specific agent
+python scripts/check_security_compliance.py ~/.openclaw/workspace/SOUL.md
+```
+
+## What's New in v1.2.0
+
+### SECURITY.md Compliance Checking
+- Checks if Agents properly reference SECURITY.md
+- Verifies security baseline principles are included
+- Scores compliance (0-100)
+- Reports missing security elements
+
+### Usage
+```bash
+# Check compliance of all agents
+python scripts/check_security_compliance.py
+
+# Check specific SOUL.md
+python scripts/check_security_compliance.py /path/to/SOUL.md
 ```
 
 ## Scanning Modes
