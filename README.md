@@ -1,8 +1,8 @@
-# Orange TrustSkill v2.2 🍊
+# Orange TrustSkill v2.3 🍊
 
 OpenClaw Skills 高级安全扫描器
 
-[![版本](https://img.shields.io/badge/version-2.2.0-orange.svg)](https://github.com/iamoldorange666/orange-trustskill)
+[![版本](https://img.shields.io/badge/version-2.3.0-orange.svg)](https://github.com/iamoldorange666/orange-trustskill)
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/)
 [![协议](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -12,6 +12,7 @@ OpenClaw Skills 高级安全扫描器
 - 🎯 **精准检测**: 上下文感知模式匹配
 - 🌈 **丰富输出**: 彩色文本、JSON、Markdown 格式
 - 📊 **进度跟踪**: 实时扫描进度显示
+- 🔐 **SECURITY.md 合规检查**: 验证 Agent 安全基线
 - 🔒 **全面检查**:
   - 命令注入 (eval, exec, os.system)
   - 数据外泄 (HTTP 请求)
@@ -24,16 +25,16 @@ OpenClaw Skills 高级安全扫描器
 
 ```bash
 # 扫描 skill
-python3 src/cli.py /path/to/skill
+python3 scripts/scan_skill.py /path/to/skill
+
+# 检查 SECURITY.md 合规性
+python3 scripts/check_security_compliance.py
 
 # 深度扫描（完整检查）
-python3 src/cli.py /path/to/skill --mode deep
+python3 scripts/scan_skill.py /path/to/skill --mode deep
 
 # JSON 输出
-python3 src/cli.py /path/to/skill --format json
-
-# 导出给 LLM 审查
-python3 src/cli.py /path/to/skill --export-for-llm
+python3 scripts/scan_skill.py /path/to/skill --format json
 ```
 
 ## 📦 安装
@@ -76,6 +77,24 @@ python3 src/cli.py ~/.openclaw/skills/my-skill --format json --quiet
 # Markdown 手动审查
 python3 src/cli.py ~/.openclaw/skills/my-skill --export-for-llm > report.md
 ```
+
+## 🔐 SECURITY.md 合规检查 (v2.3 新增)
+
+检查 Agent 是否正确引用统一安全基线：
+
+```bash
+# 检查所有 Agent
+python3 scripts/check_security_compliance.py
+
+# 检查特定 Agent
+python3 scripts/check_security_compliance.py ~/.openclaw/workspace/SOUL.md
+```
+
+**检查项**:
+- SECURITY.md 是否存在
+- 是否正确引用 SECURITY.md
+- 安全基线原则是否完整
+- 评分系统 (0-100)
 
 ## 🛡️ 安全检查项
 
@@ -132,17 +151,18 @@ src/
 4. **风险评估**: 分类和优先级排序
 5. **丰富报告**: 多种输出格式
 
-## 🆚 v1.x 对比
+## 🆚 版本对比
 
-| 功能 | v1.x | v2.0 |
-|------|------|------|
-| 正则分析 | ✅ | ✅ |
-| AST 分析 | ❌ | ✅ |
-| 多格式输出 | ❌ | ✅ |
-| 进度跟踪 | ❌ | ✅ |
-| 彩色输出 | ❌ | ✅ |
-| 置信度评分 | ❌ | ✅ |
-| 模块化架构 | ❌ | ✅ |
+| 功能 | v1.x | v2.0 | v2.3 |
+|------|------|------|------|
+| 正则分析 | ✅ | ✅ | ✅ |
+| AST 分析 | ❌ | ✅ | ✅ |
+| 多格式输出 | ❌ | ✅ | ✅ |
+| 进度跟踪 | ❌ | ✅ | ✅ |
+| 彩色输出 | ❌ | ✅ | ✅ |
+| 置信度评分 | ❌ | ✅ | ✅ |
+| 模块化架构 | ❌ | ✅ | ✅ |
+| **SECURITY.md 合规检查** | ❌ | ❌ | ✅ ⭐ |
 
 ## 🤝 贡献
 
